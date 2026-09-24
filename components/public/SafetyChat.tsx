@@ -3,7 +3,8 @@
 import { FormEvent, useState } from "react";
 import { HardHat, LoaderCircle, Send, ShieldCheck, UserRound } from "lucide-react";
 
-type Message = { role: "assistant" | "user"; text: string; sources?: string[] };
+type Source = { title: string; url?: string | null; jurisdiction?: string | null };
+type Message = { role: "assistant" | "user"; text: string; sources?: Source[] };
 
 const suggestions = [
   "Quels EPI dois-je porter ?",
@@ -64,7 +65,7 @@ export function SafetyChat() {
             <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-md ${message.role === "user" ? "bg-slate-200 text-navy" : "bg-primary text-white"}`}>{message.role === "user" ? <UserRound size={16} /> : <HardHat size={16} />}</span>
             <div className={`max-w-[82%] whitespace-pre-line rounded-md px-4 py-3 text-sm leading-6 ${message.role === "user" ? "bg-navy text-white" : "bg-slate-100 text-slate-700"}`}>
               {message.text}
-              {message.sources?.length ? <div className="mt-2 border-t border-slate-200 pt-2 text-xs font-semibold text-primary">Sources : {message.sources.join(", ")}</div> : null}
+              {message.sources?.length ? <div className="mt-2 space-y-1 border-t border-slate-200 pt-2 text-xs"><span className="font-semibold text-slate-500">Sources :</span>{message.sources.map((source, sourceIndex) => source.url ? <a key={`${source.title}-${sourceIndex}`} href={source.url} target="_blank" rel="noreferrer" className="block font-semibold text-primary hover:underline">{source.title}{source.jurisdiction ? ` (${source.jurisdiction})` : ""}</a> : <span key={`${source.title}-${sourceIndex}`} className="block font-semibold text-primary">{source.title}</span>)}</div> : null}
             </div>
           </div>
         ))}

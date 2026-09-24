@@ -103,6 +103,9 @@ model SafetyRule {
   category  String
   content   String
   keywords String[]
+  sourceTitle String?
+  sourceUrl   String?
+  jurisdiction String?
   updatedAt DateTime @updatedAt
 
   @@index([category])

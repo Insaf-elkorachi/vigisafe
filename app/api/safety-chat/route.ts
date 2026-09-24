@@ -16,10 +16,13 @@ export async function POST(request: NextRequest) {
     const normalizedQuestion = normalize(question);
     const words = new Set(normalizedQuestion.split(/[^a-z0-9]+/).filter((word) => word.length > 2));
     const rules = await prisma.safetyRule.findMany();
+    const asksForThreshold = /metre|combien|minimum|seuil|quelle hauteur|partir/.test(normalizedQuestion);
     const ranked = rules
       .map((rule) => {
         const terms = [...rule.keywords, rule.title, rule.category].flatMap((term) => normalize(term).split(/[^a-z0-9]+/));
-        const score = terms.reduce((total, term) => total + (words.has(term) ? 1 : 0), 0);
+        const keywordScore = terms.reduce((total, term) => total + (words.has(term) ? 1 : 0), 0);
+        const thresholdBoost = asksForThreshold && rule.title === "Seuils de protection antichute" ? 5 : 0;
+        const score = keywordScore + thresholdBoost;
         return { rule, score };
       })
       .filter((item) => item.score > 0)
@@ -27,13 +30,9 @@ export async function POST(request: NextRequest) {
 
     if (!ranked.length) return jsonOk({ answer: fallback, sources: [] });
     const selected = ranked.slice(0, 2).map((item) => item.rule);
-    const asksForHeightThreshold = selected.some((rule) => rule.category === "HAUTEUR") && /metre|combien|minimum|seuil|quelle hauteur/.test(normalizedQuestion);
-    const clarification = asksForHeightThreshold
-      ? "\n\nLa consigne disponible ne precise pas de seuil en metres. Pour connaitre la hauteur minimale ou les exigences applicables a une intervention, veuillez contacter le Responsable HSE."
-      : "";
     return jsonOk({
-      answer: `${selected.map((rule) => `${rule.title} : ${rule.content}`).join("\n\n")}${clarification}`,
-      sources: selected.map((rule) => rule.title)
+      answer: selected.map((rule) => `${rule.title} : ${rule.content}`).join("\n\n"),
+      sources: selected.map((rule) => ({ title: rule.sourceTitle ?? rule.title, url: rule.sourceUrl, jurisdiction: rule.jurisdiction }))
     });
   } catch (error) {
     return handleApiError(error);
