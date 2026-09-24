@@ -11,6 +11,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "prisma db seed",
+    "demo:refresh": "tsx scripts/refresh-demo-data.ts",
     "zip": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/create-zip.ps1"
   },
   "dependencies": {

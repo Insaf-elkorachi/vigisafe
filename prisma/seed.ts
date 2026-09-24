@@ -53,7 +53,7 @@ async function main() {
   ]);
 
   const authors = [karim, youssef, sara];
-  const now = new Date("2025-09-30T12:00:00Z");
+  const now = new Date();
   for (let index = 0; index < 48; index++) {
     const description = descriptions[index % descriptions.length];
     const createdAt = new Date(now);
@@ -62,7 +62,7 @@ async function main() {
     const resolved = statuses[index % statuses.length] === "TRAITEE" || statuses[index % statuses.length] === "FERMEE";
     await prisma.report.create({
       data: {
-        reference: `HSE-2025-${String(index + 1).padStart(4, "0")}`,
+        reference: `HSE-${now.getFullYear()}-${String(index + 1).padStart(4, "0")}`,
         title: description,
         description,
         authorId: authors[index % authors.length].id,

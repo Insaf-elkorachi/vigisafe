@@ -53,6 +53,12 @@ Le schema Prisma contient `User`, `Report`, `ReportHistory` et `ReportComment`, 
 
 Le seed cree 48 hazards coherents avec la maquette: 7 critiques, 14 majeurs et 27 mineurs, sur plusieurs zones, rapporteurs, categories et statuts.
 
+Pour replacer uniquement les hazards de demonstration sur les 28 derniers jours sans reinitialiser la base :
+
+```bash
+npm run demo:refresh
+```
+
 ## Voix et photos
 
 La dictee utilise `SpeechRecognition` ou `webkitSpeechRecognition` lorsque le navigateur le supporte. Les photos sont stockees en developpement dans `public/uploads`.
