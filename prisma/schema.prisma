@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  REMONTEUR
+  RESPONSABLE_HSE
+  DIRECTEUR
+}
+
+enum Severity {
+  MINEUR
+  MAJEUR
+  ELEVE
+  CRITIQUE
+}
+
+enum Status {
+  NOUVELLE
+  EN_COURS
+  OUVERTE
+  TRAITEE
+  FERMEE
+  REJETEE
+}
+
+enum Category {
+  SECURITE
+  EQUIPEMENT
+  PRODUIT_CHIMIQUE
+  EPI
+  ENVIRONNEMENT
+  LOGISTIQUE
+  PRODUCTION
+  AUTRE
+}
+
+enum Zone {
+  ATELIER
+  MAINTENANCE
+  LOGISTIQUE
+  PRODUCTION
+  MAGASIN
+  BUREAUX
+  AUTRE
+}
+
+model User {
+  id                String          @id @default(cuid())
+  name              String
+  email             String          @unique
+  passwordHash      String
+  role              Role
+  avatar            String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  reports           Report[]        @relation("ReportAuthor")
+  resolvedReports   Report[]        @relation("ResolvedBy")
+  validatedReports  Report[]        @relation("SeverityValidator")
+  history           ReportHistory[]
+}
+
+model Report {
+  id                    String          @id @default(cuid())
+  reference             String          @unique
+  title                 String
+  description           String?
+  voiceTranscript       String?
+  photoUrl              String?
+  authorId              String?
+  author                User?           @relation("ReportAuthor", fields: [authorId], references: [id])
+  reporterName          String          @default("Rapporteur")
+  severityProposed      Severity
+  severityValidated     Severity?
+  severityValidatedById String?
+  severityValidatedBy   User?           @relation("SeverityValidator", fields: [severityValidatedById], references: [id])
+  severityValidatedAt   DateTime?
+  status                Status          @default(NOUVELLE)
+  zone                  Zone            @default(AUTRE)
+  category              Category        @default(AUTRE)
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+  resolvedAt            DateTime?
+  resolvedById          String?
+  resolvedBy            User?           @relation("ResolvedBy", fields: [resolvedById], references: [id])
+  history               ReportHistory[]
+  comments              ReportComment[]
+
+  @@index([createdAt])
+  @@index([severityProposed])
+  @@index([status])
+  @@index([zone])
+}
+
+model SafetyRule {
+  id        String   @id @default(cuid())
+  title     String
+  category  String
+  content   String
+  keywords String[]
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+}
+
+model ReportHistory {
+  id        String   @id @default(cuid())
+  reportId  String
+  report    Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String
+  oldValue  String?
+  newValue  String?
+  createdAt DateTime @default(now())
+}
+
+model ReportComment {
+  id        String   @id @default(cuid())
+  reportId  String
+  report    Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  authorId  String
+  body      String
+  createdAt DateTime @default(now())
+}

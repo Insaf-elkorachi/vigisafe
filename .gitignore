@@ -1,0 +1,22 @@
+# Dependencies and builds
+node_modules/
+.next/
+out/
+coverage/
+
+# Local configuration
+.env
+.env.local
+.env.*.local
+
+# Runtime uploads and logs
+public/uploads/
+*.log
+
+# Archives and operating-system files
+*.zip
+.DS_Store
+Thumbs.db
+
+# TypeScript cache
+*.tsbuildinfo
